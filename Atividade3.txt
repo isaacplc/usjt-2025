@@ -1,0 +1,197 @@
+Atividade 1: Função is_par(n)
+Código da Função (numeros.py)
+O código a seguir define a função is_par(n), que verifica se um número é par.
+
+Python
+
+def is_par(n):
+  """
+  Retorna True se n for par, caso contrário False.
+  """
+  return n % 2 == 0
+Código dos Testes Unitários (test_numeros.py)
+Estes são os testes unitários para a função is_par, validando seu comportamento com números pares, ímpares, zero e negativos, conforme solicitado.
+
+Python
+
+from numeros import is_par
+
+def test_is_par_com_numero_par():
+  """Testa se a função retorna True para um número par."""
+  assert is_par(10) == True
+
+def test_is_par_com_numero_impar():
+  """Testa se a função retorna False para um número ímpar."""
+  assert is_par(7) == False
+
+def test_is_par_com_zero():
+  """Testa se a função retorna True para o número zero."""
+  assert is_par(0) == True
+
+def test_is_par_com_numero_negativo():
+  """Testa se a função funciona corretamente com um número par negativo."""
+  assert is_par(-4) == True
+Atividade 2: Função fatorial(n)
+Código da Função (matematica.py)
+O código abaixo define a função fatorial(n), que calcula o fatorial de um número e lança uma exceção para entradas negativas.
+
+Python
+
+import math
+
+def fatorial(n):
+  """
+  Retorna o fatorial de n.
+  Levanta um ValueError se n for negativo.
+  """
+  if n < 0:
+    raise ValueError("fatorial() não aceita números negativos")
+  return math.factorial(n)
+Código dos Testes Unitários (test_matematica.py)
+Estes testes verificam os casos de fatorial(0), fatorial(5) e o tratamento de erro para números negativos.
+
+Python
+
+import pytest
+from matematica import fatorial
+
+def test_fatorial_de_zero():
+  """Testa se fatorial(0) retorna 1."""
+  assert fatorial(0) == 1
+
+def test_fatorial_de_cinco():
+  """Testa se fatorial(5) retorna 120."""
+  assert fatorial(5) == 120
+
+def test_fatorial_de_negativo_levanta_excecao():
+  """Testa se a função levanta ValueError para entrada negativa."""
+  with pytest.raises(ValueError):
+    fatorial(-1)
+Atividade 3: Classe Conta
+Código da Classe (banco.py)
+O código a seguir implementa a classe Conta, com métodos para depositar e sacar, incluindo o tratamento de exceções para valores inválidos e saldo insuficiente.
+
+Python
+
+class InsufficientFunds(Exception):
+  """Exceção para saldo insuficiente."""
+  pass
+
+class Conta:
+  """
+  Classe que simula uma conta bancária simples.
+  """
+  def __init__(self, saldo_inicial=0):
+    if not isinstance(saldo_inicial, (int, float)) or saldo_inicial < 0:
+      raise ValueError("Saldo inicial deve ser um número não-negativo")
+    self.saldo = saldo_inicial
+
+  def depositar(self, amount):
+    if not isinstance(amount, (int, float)) or amount <= 0:
+      raise ValueError("O valor do depósito deve ser um número positivo")
+    self.saldo += amount
+
+  def sacar(self, amount):
+    if not isinstance(amount, (int, float)) or amount <= 0:
+      raise ValueError("O valor do saque deve ser um número positivo")
+    if amount > self.saldo:
+      raise InsufficientFunds("Saldo insuficiente para realizar o saque")
+    self.saldo -= amount
+Código dos Testes Unitários (test_banco.py)
+Estes testes validam as operações de depósito, saque bem-sucedido, tentativa de saque com saldo insuficiente e entradas com valores inválidos.
+
+Python
+
+import pytest
+from banco import Conta, InsufficientFunds
+
+def test_deposito_valido():
+  """Testa um depósito válido em uma conta."""
+  conta = Conta(100)
+  conta.depositar(50)
+  assert conta.saldo == 150
+
+def test_saque_com_sucesso():
+  """Testa um saque bem-sucedido."""
+  conta = Conta(100)
+  conta.sacar(70)
+  assert conta.saldo == 30
+
+def test_saque_com_saldo_insuficiente():
+  """Testa se a exceção InsufficientFunds é levantada."""
+  conta = Conta(100)
+  with pytest.raises(InsufficientFunds):
+    conta.sacar(150)
+
+def test_entradas_invalidas():
+  """Testa se a exceção ValueError é levantada para valores negativos."""
+  conta = Conta(100)
+  with pytest.raises(ValueError):
+    conta.depositar(-50)
+  with pytest.raises(ValueError):
+    conta.sacar(-20)
+Atividade 4: Função buscar_clima(cidade) com Mock
+Código da Função (clima.py)
+Esta função simula uma chamada a uma API externa para buscar o clima de uma cidade e inclui tratamento de erros de conexão.
+
+Python
+
+import requests
+
+def buscar_clima(cidade):
+  """
+  Busca a temperatura de uma cidade em uma API externa.
+  """
+  try:
+    url = f"https://api.exemplo/clima?cidade={cidade}"
+    response = requests.get(url, timeout=5)
+    response.raise_for_status() # Levanta exceção para respostas de erro (4xx ou 5xx)
+    data = response.json()
+    if 'temperatura' in data:
+      return data['temperatura']
+    else:
+      return "Temperatura não encontrada"
+  except requests.exceptions.RequestException:
+    return "Erro de conexão com a API"
+Código dos Testes Unitários (test_clima.py)
+Os testes abaixo usam mocks para simular a chamada à API externa, permitindo testar a função buscar_clima de forma isolada, rápida e sem depender da internet.
+
+Python
+
+import pytest
+from unittest.mock import patch, Mock
+from clima import buscar_clima
+import requests
+
+@patch('clima.requests.get')
+def test_buscar_clima_com_sucesso(mock_get):
+  """Testa o caminho feliz, onde a API retorna a temperatura."""
+  mock_response = Mock()
+  mock_response.status_code = 200
+  mock_response.json.return_value = {'cidade': 'São Paulo', 'temperatura': 25}
+  mock_get.return_value = mock_response
+
+  temperatura = buscar_clima('São Paulo')
+
+  assert temperatura == 25
+
+@patch('clima.requests.get')
+def test_buscar_clima_sem_chave_temperatura(mock_get):
+  """Testa o caso onde a resposta da API não contém a chave 'temperatura'."""
+  mock_response = Mock()
+  mock_response.status_code = 200
+  mock_response.json.return_value = {'cidade': 'Rio de Janeiro', 'umidade': '80%'}
+  mock_get.return_value = mock_response
+
+  resultado = buscar_clima('Rio de Janeiro')
+
+  assert resultado == "Temperatura não encontrada"
+
+@patch('clima.requests.get')
+def test_buscar_clima_erro_de_conexao(mock_get):
+  """Testa o tratamento de exceção quando a chamada à API falha."""
+  mock_get.side_effect = requests.exceptions.Timeout
+
+  resultado = buscar_clima('Curitiba')
+
+  assert resultado == "Erro de conexão com a API"
