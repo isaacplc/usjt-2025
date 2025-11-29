@@ -1,0 +1,10 @@
+BancoLimpo/
+│
+├── src/
+│   ├── Cliente.java
+│   ├── ContaBancaria.java
+│   └── BancoAppGUI.java
+│
+└── testes/
+    └── ContaBancariaTest.java
+
